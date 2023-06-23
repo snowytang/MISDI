@@ -1,0 +1,170 @@
+---
+title: "IMDB"
+output: html_document
+Author: 'Snowy Tang'
+date: "2023-06-22"
+---
+
+```{r}
+# load libraries (quietly stops all the messages appearing)
+library(readr, quietly = TRUE)
+library(dplyr, quietly = TRUE)
+install.packages("DT")
+library(DT, quietly = TRUE)
+
+# load imdb and bechdel
+movies_imdb <- read_csv("https://raw.githubusercontent.com/andrewmoles2/rTrainIntroduction/main/r-data-wrangling-1/data/IMDb%20movies.csv")
+
+bechdel <- read_csv("https://raw.githubusercontent.com/andrewmoles2/rTrainIntroduction/main/r-data-wrangling-1/data/raw_bechdel.csv")
+
+# fix imdb id key
+movies_imdb$imdb_title_id <- parse_number(movies_imdb$imdb_title_id)
+
+# join data (left join)
+imdb_bechdel <- left_join(x = movies_imdb, y = bechdel,
+                          by = c("imdb_title_id" = "imdb_id", "year", "title"))
+
+# review the data
+# just looking at Alfred Hitchcock movies in this example
+imdb_bechdel %>%
+  filter(grepl("Alfred Hitchcock", director)) %>%
+  datatable()
+```
+```{r}
+library(ggplot2)
+library(tidyr)
+install.packages("ggtext")
+library(ggtext)
+
+imdb_bechdel %>%
+  filter(grepl("Alfred Hitchcock", director)) %>%
+  mutate(rating_string = case_when(
+    rating == 0 ~ "bechdel rating 0",
+    rating == 1 ~ "bechdel rating 1",
+    rating == 2 ~ "bechdel rating 2",
+    rating == 3 ~ "bechdel rating 3"
+  )) %>%
+  drop_na(rating) -> hitchcock
+
+h_avg_vote <- mean(hitchcock$avg_vote)
+
+hitchcock %>%
+  ggplot(aes(x = year, y = avg_vote, colour = factor(rating_string))) +
+  geom_point() +
+  geom_line() +
+  geom_hline(yintercept = h_avg_vote, linetype = 2, colour = "grey75") +
+  facet_wrap(vars(rating_string), nrow = 2) +
+  guides(colour = "none") + 
+  labs(title = "Alfred Hitchcock films IMDB and bechdel rating",
+       caption = "Bechdel Rule is a simple test which names the following three criteria: 
+       (1) it has to have at least two women in it, who 
+       (2) who talk to each other, about 
+       (3) something besides a man",
+       x = "Year film released",
+       y = "Average IMDB rating") +
+  scale_colour_manual(values = c('#ef2d56','#ed7d3a','#dced31','#0cce6b')) +
+  scale_y_continuous(limits = c(4, 10)) +
+  theme_minimal(base_family = "Arial") +
+  theme(strip.background = element_blank(),
+        strip.text = element_textbox(size = 12, colour = "white", fill = "#5D729D", box.colour = "#4A618C",
+                                     halign = 0.5, linetype = 1, r = unit(5, "pt"), width = unit(1, "npc"),
+                                     padding = margin(2,0,1,0), margin = margin(3,3,3,3)),
+        plot.caption = element_text(hjust = 0),
+        plot.title.position = "plot")
+```
+
+```{r}
+
+library(readr, quietly = TRUE)
+library(dplyr, quietly = TRUE)
+install.packages("DT")
+library(DT, quietly = TRUE)
+
+movies_imdb <- read_csv("https://raw.githubusercontent.com/andrewmoles2/rTrainIntroduction/main/r-data-wrangling-1/data/IMDb%20movies.csv")
+
+bechdel <- read_csv("https://raw.githubusercontent.com/andrewmoles2/rTrainIntroduction/main/r-data-wrangling-1/data/raw_bechdel.csv")
+
+library(ggplot2)
+library(tidyr)
+install.packages("ggtext")
+library(ggtext)
+
+imdb_bechdel %>%
+  filter(grepl("Woody Allen", director)) %>%
+  mutate(rating_string = case_when(
+    rating == 0 ~ "bechdel rating 0",
+    rating == 1 ~ "bechdel rating 1",
+    rating == 2 ~ "bechdel rating 2",
+    rating == 3 ~ "bechdel rating 3"
+  )) %>%
+  drop_na(rating) -> woody
+
+h_avg_vote <- mean(woody$avg_vote)
+
+woody %>%
+  ggplot(aes(x = year, y = avg_vote, colour = factor(rating_string))) +
+  geom_point() +
+  geom_line() +
+  geom_hline(yintercept = h_avg_vote, linetype = 2, colour = "grey75") +
+  facet_wrap(vars(rating_string), nrow = 2) +
+  guides(colour = "none") + 
+    labs(title = "Woody Allen films IMDB and bechdel rating",
+         caption = "Bechdel Rule is a simple test which names the following three criteria: 
+       (1) it has to have at least two women in it, who 
+       (2) who talk to each other, about 
+       (3) something besides a man",
+       x = "Year film released",
+       y = "Average IMDB rating") +
+  scale_colour_manual(values = c('#ef2d56','#ed7d3a','#dced31','#0cce6b')) +
+  scale_y_continuous(limits = c(4, 10)) +
+  theme_minimal(base_family = "Arial") +
+  theme(strip.background = element_blank(),
+        strip.text = element_textbox(size = 12, colour = "white", fill = "#5D729D", box.colour = "#4A618C",
+                                     halign = 0.5, linetype = 1, r = unit(5, "pt"), width = unit(1, "npc"),
+                                     padding = margin(2,0,1,0), margin = margin(3,3,3,3)),
+        plot.caption = element_text(hjust = 0),
+        plot.title.position = "plot")
+
+
+```
+
+
+```{r}
+
+library(readr, quietly = TRUE)
+library(dplyr, quietly = TRUE)
+install.packages("DT")
+library(DT, quietly = TRUE)
+
+movies_imdb <- read_csv("https://raw.githubusercontent.com/andrewmoles2/rTrainIntroduction/main/r-data-wrangling-1/data/IMDb%20movies.csv")
+
+library(ggplot2)
+library(tidyr)
+install.packages("ggtext")
+library(ggtext)
+
+hongkong <- movies_imdb %>%
+  filter(grepl("Hong Kong", country))
+
+h_avg_vote <- mean(hongkong$avg_vote)
+
+hongkong %>%
+  ggplot(aes(x = year, y = avg_vote, colour = avg_vote)) +
+  geom_point() +
+  geom_hline(yintercept = h_avg_vote, linetype = 2, colour = "grey75") +
+  labs(title = "IMDb Ratings of Hong Kong Movies Over Years",
+       x="Year",
+       y = "Average IMDb rating")+
+  #scale_colour_manual(values = c('#ef2d56','#ed7d3a','#dced31','#0cce6b')) +
+  scale_y_continuous(limits = c(4, 10)) +
+  theme_minimal(base_family = "Arial") +
+  theme(strip.background = element_blank(),
+        strip.text = element_textbox(size = 12, colour = "white", fill = "#5D729D",
+                                     box.colour = "#4A618C",halign = 0.5, linetype = 1,
+                                     r= unit(5, "pt"), width = unit(1,"npc"), 
+                                     padding=margin(2,0,1,0), margin = margin(3,3,3,3)),
+        plot.caption = element_text(hjust = 0),
+        plot.title.position = "plot")  
+
+```
+
